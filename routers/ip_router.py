@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Query, HTTPException
 from services.ip_service import check_ip_reputation
+from services.cve_enricher import fetch_cves_by_keyword
 import ipaddress
 
 router = APIRouter()

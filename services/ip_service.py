@@ -2,12 +2,15 @@ import requests
 import ipaddress
 import os
 from dotenv import load_dotenv
+from services.cve_enricher import fetch_cves_by_keyword
+
 
 load_dotenv()
 
 VT_API_KEY = os.getenv("VT_API_KEY")
 ABUSE_API_KEY = os.getenv("ABUSE_API_KEY")
 OTX_API_KEY = os.getenv("OTX_API_KEY")
+NVD_API_URL = "https://services.nvd.nist.gov/rest/json/cves/2.0"
 
 TIMEOUT = 10
 
@@ -114,7 +117,7 @@ def check_talos(ip):
         "url": f"https://talosintelligence.com/reputation_center/lookup?search={ip}"
     }
 
-
+    
 # -------------------- GLOBAL FUNCTION --------------------
 def check_ip_reputation(param: str):
 
@@ -152,5 +155,11 @@ def check_ip_reputation(param: str):
         final_verdict = "clean"
 
     result["final_verdict"] = final_verdict
+    if final_verdict in ["malicious", "suspicious"]:
+     keyword = "remote code execution"
+     cve_info = fetch_cves_by_keyword(keyword, max_results=3)
+     result["cve_enrichment"] = cve_info
 
     return result
+
+    
